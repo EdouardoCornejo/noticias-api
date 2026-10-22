@@ -11,7 +11,7 @@ const Noticia = ({ noticia }) => {
   const { urlToImage, url, title, description, source } = noticia;
   /* Returning the JSX code. */
   return (
-    <Grid item md={6} lg={4}>s
+    <Grid item xs={12} md={6} lg={4}>
       <Card>
         {urlToImage && (
           <CardMedia
@@ -36,6 +36,7 @@ const Noticia = ({ noticia }) => {
           <Link
             href={url}
             target="_blank"
+            rel="noopener noreferrer"
             variant="button"
             width={"100%"}
             textAlign={"center"}

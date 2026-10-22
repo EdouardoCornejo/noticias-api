@@ -7,11 +7,11 @@ import Noticia from "./Noticia";
 
 const ListadoNoticias = () => {
   /* Destructuring the object returned by the useNoticias hook. */
-  const { noticias, totalNoticias, handleOnchangePagina, pagina } =
+  const { noticias, totalNoticias, handleOnchangePagina, pagina, error } =
     useNoticias();
 
-  /* Calculating the total number of pages. */
-  const totalPaginas = Math.ceil(totalNoticias / 20);
+  /* NewsAPI (plan gratuito) solo permite consultar los primeros 100 resultados. */
+  const totalPaginas = Math.ceil(Math.min(totalNoticias, 100) / 20);
 
   return (
     <>
@@ -24,6 +24,12 @@ const ListadoNoticias = () => {
       >
         Ultimas Noticias
       </Typography>
+
+      {error && (
+        <Typography textAlign={"center"} color="error">
+          {error}
+        </Typography>
+      )}
 
       <Stack
         sx={{

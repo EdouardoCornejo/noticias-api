@@ -1,6 +1,9 @@
 import axios from "axios";
 import { useState, useEffect, createContext } from "react";
 
+/* NewsAPI ya no devuelve titulares para "mx"; se usa un país con resultados. */
+const PAIS = "us";
+
 /* Creating a context object. */
 const NoticiasContext = createContext();
 
@@ -10,40 +13,44 @@ const NoticiasProvider = ({ children }) => {
   const [noticias, setNoticias] = useState([]);
   const [pagina, setPagina] = useState(1);
   const [totalNoticias, setTotalNoticias] = useState(0);
+  const [error, setError] = useState("");
 
-  /* A hook that is called when the component is mounted and when the value of the variable `categoria`
-changes. */
+  /* A hook that is called when the component is mounted and when `categoria` or `pagina` change. */
   useEffect(() => {
-    const consultarAPI = async () => {
-      const url = `https://newsapi.org/v2/top-headlines?country=mx&category=${categoria}&apiKey=${
-        import.meta.env.VITE_API_KEY
-      }`;
+    const controller = new AbortController();
 
-      const { data } = await axios(url);
-      setNoticias(data.articles);
-      setTotalNoticias(data.totalResults);
-      setPagina(1);
+    const consultarAPI = async () => {
+      try {
+        const { data } = await axios.get(
+          "https://newsapi.org/v2/top-headlines",
+          {
+            params: {
+              country: PAIS,
+              category: categoria,
+              page: pagina,
+              apiKey: import.meta.env.VITE_API_KEY,
+            },
+            signal: controller.signal,
+          }
+        );
+        setNoticias(data.articles.filter((noticia) => noticia.title !== "[Removed]"));
+        setTotalNoticias(data.totalResults);
+        setError("");
+      } catch (err) {
+        if (axios.isCancel(err)) return;
+        setNoticias([]);
+        setTotalNoticias(0);
+        setError(err.response?.data?.message ?? "No se pudieron cargar las noticias");
+      }
     };
     consultarAPI();
-  }, [categoria]);
 
-  /* A hook that is called when the component is mounted and when the value of the variable `pagina`
-changes. */
-  useEffect(() => {
-    const consultarAPI = async () => {
-      const url = `https://newsapi.org/v2/top-headlines?country=mx&page=${pagina}&category=${categoria}&apiKey=${
-        import.meta.env.VITE_API_KEY
-      }`;
-
-      const { data } = await axios(url);
-      setNoticias(data.articles);
-      setTotalNoticias(data.totalResults);
-    };
-    consultarAPI();
-  }, [pagina]);
+    return () => controller.abort();
+  }, [categoria, pagina]);
 
   const handleChangeCategoria = (e) => {
     setCategoria(e.target.value);
+    setPagina(1);
   };
 
   const handleOnchangePagina = (e, valor) => {
@@ -60,6 +67,7 @@ changes. */
         totalNoticias,
         handleOnchangePagina,
         pagina,
+        error,
       }}
     >
       {children}
