@@ -1,9 +1,6 @@
 import axios from "axios";
 import { useState, useEffect, createContext } from "react";
 
-/* NewsAPI ya no devuelve titulares para "mx"; se usa un país con resultados. */
-const PAIS = "us";
-
 /* Creating a context object. */
 const NoticiasContext = createContext();
 
@@ -21,18 +18,10 @@ const NoticiasProvider = ({ children }) => {
 
     const consultarAPI = async () => {
       try {
-        const { data } = await axios.get(
-          "https://newsapi.org/v2/top-headlines",
-          {
-            params: {
-              country: PAIS,
-              category: categoria,
-              page: pagina,
-              apiKey: import.meta.env.VITE_API_KEY,
-            },
-            signal: controller.signal,
-          }
-        );
+        const { data } = await axios.get("/api/news", {
+          params: { category: categoria, page: pagina },
+          signal: controller.signal,
+        });
         setNoticias(data.articles.filter((noticia) => noticia.title !== "[Removed]"));
         setTotalNoticias(data.totalResults);
         setError("");
