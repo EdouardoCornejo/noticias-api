@@ -191,8 +191,6 @@ noticias-api/
 │   ├── hooks/
 │   │   └── useNoticias.jsx      # Acceso al contexto
 │   ├── App.jsx
-│   ├── App.css
-│   ├── index.css
 │   └── main.jsx
 ├── .env.example
 ├── .vercelignore
